@@ -12,7 +12,7 @@ export declare function translateRequest(provider: string, body: unknown, modelN
 export declare function translateResponse(provider: string, response: unknown, stateKey: string, apiFormat?: ApiFormat, toolSchemas?: ToolSchemas): unknown;
 export declare function translateStreamChunk(provider: string, chunk: unknown, stateKey: string, apiFormat?: ApiFormat, streamKey?: string, toolSchemas?: ToolSchemas): unknown;
 export declare const OPENROUTER_APP_REFERER = "https://github.com/vahapogut/antigravity-add-model";
-export declare const OPENROUTER_APP_TITLE = "Google Antigravity (antigravity-add-model)";
+export declare const OPENROUTER_APP_TITLE = "Antigravity (antigravity-add-model)";
 export declare function getProviderHeaders(provider: string, apiKey?: string, apiFormat?: ApiFormat, apiUrl?: string): ProviderHeaders;
 export declare function supportsStreaming(_provider: string): boolean;
 export declare function getProviderUrl(baseUrl: string, modelName: string, isStream: boolean, translator: TranslatorModule | null): string;

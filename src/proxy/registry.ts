@@ -59,11 +59,12 @@ export function translateStreamChunk(
   return openai.mapOpenAIChunkToGemini(chunk as never, stateKey, streamKey, toolSchemas);
 }
 
-// OpenRouter identifies an app by its HTTP-Referer and freezes its display name
-// (X-Title) the first time traffic arrives for that referer. antigravity.google is
-// already claimed by an unrelated app record, so attribution must use our own URL.
+// OpenRouter identifies an app by the origin of its HTTP-Referer: subpaths collapse to
+// the root origin, and an unknown origin creates a new app record. antigravity.google is
+// already claimed by an unrelated tool, so attribution must use our own URL. The display
+// name (X-Title) follows the most recent request for that origin.
 export const OPENROUTER_APP_REFERER = 'https://github.com/vahapogut/antigravity-add-model';
-export const OPENROUTER_APP_TITLE = 'Google Antigravity (antigravity-add-model)';
+export const OPENROUTER_APP_TITLE = 'Antigravity (antigravity-add-model)';
 
 export function getProviderHeaders(provider: string, apiKey = '', apiFormat?: ApiFormat, apiUrl = ''): ProviderHeaders {
   const headers: ProviderHeaders = { 'Content-Type': 'application/json' };
