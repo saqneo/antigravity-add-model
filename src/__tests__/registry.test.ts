@@ -1,4 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
+import {
+  getProviderHeaders,
+  OPENROUTER_APP_REFERER,
+  OPENROUTER_APP_TITLE,
+} from '../proxy/registry';
 
 // We need to mock electron-log and fs/path before importing the registry
 vi.mock('electron-log', () => ({
@@ -40,18 +45,15 @@ describe('Registry - OpenRouter support', () => {
   });
 
   it('openrouter should use Bearer token auth', () => {
-    // Based on the getProviderHeaders implementation:
-    // openrouter case sets Authorization: Bearer <apiKey>
-    // plus HTTP-Referer and X-Title
-    const openRouterHeaders = {
-      'Content-Type': 'application/json',
-      Authorization: 'Bearer sk-or-key-123',
-      'HTTP-Referer': 'https://antigravity.google',
-      'X-Title': 'Antigravity',
-    };
-    expect(openRouterHeaders['Authorization']).toBe('Bearer sk-or-key-123');
-    expect(openRouterHeaders['HTTP-Referer']).toBeTruthy();
-    expect(openRouterHeaders['X-Title']).toBe('Antigravity');
+    const headers = getProviderHeaders('openrouter', 'sk-or-key-123');
+    expect(headers['Content-Type']).toBe('application/json');
+    expect(headers['Authorization']).toBe('Bearer sk-or-key-123');
+    expect(headers['HTTP-Referer']).toBe(OPENROUTER_APP_REFERER);
+    expect(headers['X-Title']).toBe(OPENROUTER_APP_TITLE);
+    // OpenRouter freezes an app's display name at the first title seen for a given
+    // referer, and antigravity.google is claimed by an unrelated app record.
+    expect(headers['HTTP-Referer']).not.toContain('antigravity.google');
+    expect(headers['X-Title']).toContain('Antigravity');
   });
 
   it('should produce the same header for openai and openrouter (both Bearer)', () => {

@@ -59,6 +59,12 @@ export function translateStreamChunk(
   return openai.mapOpenAIChunkToGemini(chunk as never, stateKey, streamKey, toolSchemas);
 }
 
+// OpenRouter identifies an app by its HTTP-Referer and freezes its display name
+// (X-Title) the first time traffic arrives for that referer. antigravity.google is
+// already claimed by an unrelated app record, so attribution must use our own URL.
+export const OPENROUTER_APP_REFERER = 'https://github.com/vahapogut/antigravity-add-model';
+export const OPENROUTER_APP_TITLE = 'Google Antigravity (antigravity-add-model)';
+
 export function getProviderHeaders(provider: string, apiKey = '', apiFormat?: ApiFormat, apiUrl = ''): ProviderHeaders {
   const headers: ProviderHeaders = { 'Content-Type': 'application/json' };
   const format = resolveApiFormat(provider, apiFormat);
@@ -73,8 +79,8 @@ export function getProviderHeaders(provider: string, apiKey = '', apiFormat?: Ap
     else headers.Authorization = `Bearer ${apiKey}`;
   }
   if (provider === 'openrouter') {
-    headers['HTTP-Referer'] = 'https://antigravity.google';
-    headers['X-Title'] = 'Antigravity';
+    headers['HTTP-Referer'] = OPENROUTER_APP_REFERER;
+    headers['X-Title'] = OPENROUTER_APP_TITLE;
   }
   if (opencode) headers['User-Agent'] = OPENCODE_USER_AGENT;
   return headers;
