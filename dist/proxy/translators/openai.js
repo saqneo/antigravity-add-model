@@ -137,11 +137,21 @@ function mapGeminiToOpenAI(geminiBody, modelName, stateKey = modelName) {
                             });
                         }
                     }
+                    // Preserve the reasoning trace on tool-call turns as well; dropping it
+                    // here left upstream models blind to their own prior analysis between
+                    // tool calls (verified amnesia: repeated/broken tool calls downstream).
                     const text = item.parts
                         .filter((p) => p.text && !p.thought)
                         .map((p) => p.text)
                         .join('');
-                    messages.push({ role: 'assistant', content: text || null, tool_calls: toolCalls });
+                    const toolTurnReasoning = item.parts
+                        .filter((p) => p.text && p.thought)
+                        .map((p) => p.text)
+                        .join('');
+                    const toolTurnMsg = { role: 'assistant', content: text || null, tool_calls: toolCalls };
+                    if (toolTurnReasoning)
+                        toolTurnMsg.reasoning_content = toolTurnReasoning;
+                    messages.push(toolTurnMsg);
                 }
                 else if (hasFunctionResponse) {
                     for (const p of item.parts) {

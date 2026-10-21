@@ -175,6 +175,51 @@ describe('mapGeminiToOpenAI', () => {
     ]);
   });
 
+  it('preserves thought parts as reasoning_content on tool-call turns', () => {
+    const result = mapGeminiToOpenAI(
+      {
+        contents: [
+          {
+            role: 'model',
+            parts: [
+              { text: 'Plan: verify the path before retrying.', thought: true },
+              { text: 'Then rerun the write.', thought: true },
+              { functionCall: { name: 'write_to_file', id: 'retry-write', args: { TargetFile: '/tmp/retry.txt' } } },
+            ],
+          },
+        ],
+      },
+      'external-model',
+    );
+    expect(result.messages[0].tool_calls).toHaveLength(1);
+    expect(result.messages[0].content).toBeNull();
+    // Tool-call turns must carry the model's reasoning back to the provider;
+    // dropping it causes amnesia in reasoning models between tool calls.
+    expect(result.messages[0].reasoning_content).toBe(
+      'Plan: verify the path before retrying.Then rerun the write.',
+    );
+  });
+
+  it('keeps tool-call turn thought text out of visible content', () => {
+    const result = mapGeminiToOpenAI(
+      {
+        contents: [
+          {
+            role: 'model',
+            parts: [
+              { text: 'Internal reasoning', thought: true },
+              { text: 'Visible note.' },
+              { functionCall: { name: 'write_to_file', id: 'write-1', args: { TargetFile: '/tmp/a.txt' } } },
+            ],
+          },
+        ],
+      },
+      'external-model',
+    );
+    expect(result.messages[0].content).toBe('Visible note.');
+    expect(result.messages[0].reasoning_content).toBe('Internal reasoning');
+  });
+
   it.each([false, true])('keeps tool failure text after all matching tool results (split items: %s)', (splitItems) => {
     const failure = 'WRITE_ERROR: invalid tool call: additional properties AbsolutePath not allowed';
     const body = {
